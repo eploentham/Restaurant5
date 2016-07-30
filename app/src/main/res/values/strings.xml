@@ -1,3 +1,30 @@
 <resources>
     <string name="app_name">Restaurant5</string>
+    <string name="minced">ลาบ</string>
+    <string name="fall">น้ำตก</string>
+    <string name="koy">ก้อย</string>
+    <string name="pork">หมู</string>
+    <string name="beef">เนื้อ</string>
+    <string name="catfish">ปลาดุก</string>
+    <string name="sour">เปรี้ยว</string>
+    <string name="bitter">ขม</string>
+    <string name="koo">คั้ว</string>
+    <string name="bone">กระดูก</string>
+    <string name="zaa">แซบ</string>
+    <string name="boil">ต้ม</string>
+    <string name="thicksoup">แกงอ่อม</string>
+    <string name="papaya_salad">ส้มตำ</string>
+    <string name="salad">สลัด</string>
+    <string name="crab">ปู</string>
+    <string name="pickledfish">ปลาร้า</string>
+    <string name="thai">ไทย</string>
+    <string name="charcoal">ถ่าน</string>
+    <string name="gril">ย่าง</string>
+    <string name="neck">คอ</string>
+    <string name="weepingtiger">เสือร้องไห้</string>
+    <string name="stickyrice">ข้าวเหนียว</string>
+    <string name="rib">ซี่โครง</string>
+    <string name="bamboo_shoot_salad">ซุปหน่อไม้</string>
+    <string name="burn">ลวก</string>
+    <string name="save">บันทึก</string>
 </resources>
