@@ -2,6 +2,7 @@ package com.nakoyagarden.ekapop.restaurant5;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,14 +31,15 @@ public class JsonParser {
     static InputStream is = null;
     static JSONObject jObj = null;
     static String json = "";
-
-    public JSONObject getJSONFromUrl(String url,List<NameValuePair> params) {
+    JSONArray jarr;
+    public JSONArray getJSONFromUrl(String url, List<NameValuePair> params) {
         // make HTTP request
         try {
 
             HttpClient httpClient = new DefaultHttpClient();
             HttpPost httpPost = new HttpPost(url);
-            httpPost.setEntity(new UrlEncodedFormEntity(params));
+            //httpPost.setEntity(new UrlEncodedFormEntity(params));
+            httpPost.setEntity(new UrlEncodedFormEntity(params,"UTF-8"));
 
             HttpResponse httpResponse = httpClient.execute(httpPost);
             HttpEntity httpEntity = httpResponse.getEntity();
@@ -53,7 +55,7 @@ public class JsonParser {
 
         try {
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "utf-8"), 8);
             StringBuilder sb = new StringBuilder();
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -61,19 +63,22 @@ public class JsonParser {
             }
             is.close();
             json = sb.toString();
-
+            //json = json.replace("[","");
+            //json = json.replace("]","");
         } catch (Exception e) {
             Log.e(TAG, "Error converting result " + e.toString());
         }
 
         // try parse the string to a JSON object
         try {
-            jObj = new JSONObject(json);
+            //jObj = new JSONObject(json);
+            jarr = new JSONArray(json);
+            //jObj = new JSONObject("{\"code\":\"1000\",\"name\":\"\\u0e43\\u0e19\\u0e23\\u0e49\\u0e32\\u0e19\"},{\"code\":\"1001\",\"name\":\"\\u0e1f\\u0e38\\u0e15\\u0e1a\\u0e32\\u0e17\"},{\"code\":\"1002\",\"name\":\"\\u0e43\\u0e19\\u0e2a\\u0e27\\u0e19\"}");
         } catch (JSONException e) {
             Log.e(TAG, "Error parsing data " + e.toString());
         }
 
         // return JSON String
-        return jObj;
+        return jarr;
     }
 }

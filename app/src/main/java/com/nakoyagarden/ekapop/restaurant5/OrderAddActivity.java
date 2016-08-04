@@ -1,5 +1,8 @@
 package com.nakoyagarden.ekapop.restaurant5;
 
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Interpolator;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,26 +12,43 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.hrules.horizontalnumberpicker.HorizontalNumberPicker;
 import com.hrules.horizontalnumberpicker.HorizontalNumberPickerListener;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public class OrderAddActivity extends AppCompatActivity implements HorizontalNumberPickerListener {
     Spinner cboTable, cboArea;
     TextView lbDate, lbMinced, lbFall, lbKoy, lbBoilZaa, lbThickSoup,lbPapazaSalad,lbGrillPorkNeck,lbWeepingTiger,lbGrillRibBeef,lbStickyRice,lbBambooShootSalad,lbBurnBeef;
+    TextView lbMessage;
     HorizontalNumberPicker txtQtyMinced,txtQtyFall,txtQtyKoy,txtQtyBoilZaa,txtQtyThickSoup,txtQtyPapazaSalad,txtQtyGrillPorkNeck,txtQtyWeepingTiger,txtQtyGrillRibBeef,txtQtyStickyRice,txtQtyBambooShootSalad,txtQtyBurnBeef;
     EditText txtRemarkMinced;
     RadioButton chkMincedPork, chkMincedBeef, chkMincedCatFish;
@@ -41,11 +61,14 @@ public class OrderAddActivity extends AppCompatActivity implements HorizontalNum
 
     JsonParser jsonparser = new JsonParser();
     JSONObject jobj = null;
-    String ab;
+    String ab, qtyMinced, qtyFall, qtyKoy, qtyBoilZaa, qtyThickSoup, qtyPapazaSalad, qtyGrillPorkNeck, qtyWeepingTiger, qtyGrillRibBeef, qtyStickRice, qtyBambooShootSalad, qtyBurnBeef;
+    int textSize=20,textSize1=18, row;
 
     public RestaurantControl rs;
     public ArrayList<String> sCboTable = new ArrayList<String>();
     public ArrayList<String> sCboArea = new ArrayList<String>();
+    JSONArray jarr;
+    //private ArrayList<Locale.Category> categoriesList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Integer min=9;
@@ -68,6 +91,8 @@ public class OrderAddActivity extends AppCompatActivity implements HorizontalNum
         lbStickyRice = (TextView) findViewById(R.id.lbStickyRice);
         lbBambooShootSalad = (TextView) findViewById(R.id.lbBambooShootSalad);
         lbBurnBeef = (TextView) findViewById(R.id.lbBurnBeef);
+        lbMessage = (TextView) findViewById(R.id.lbMessage);
+
         txtRemarkMinced = (EditText) findViewById(R.id.txtRemarkMinced);
         btnSave = (Button) findViewById(R.id.btnSave);
 
@@ -156,6 +181,11 @@ public class OrderAddActivity extends AppCompatActivity implements HorizontalNum
         lbStickyRice.setText(R.string.stickyrice);
         lbBambooShootSalad.setText(R.string.bamboo_shoot_salad);
         lbBurnBeef.setText(getResources().getString(R.string.beef)+getResources().getString(R.string.burn));
+        lbMessage.setText("");
+
+        setTheme();
+
+
 
         chkMincedPork.setText(R.string.pork);
         chkMincedBeef.setText(R.string.beef);
@@ -188,48 +218,170 @@ public class OrderAddActivity extends AppCompatActivity implements HorizontalNum
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                txtQtyMinced.getValue();
+                //txtQtyMinced.getValue();
                 saveOrder();
             }
         });
 
         //setCboTable();
-        rs = new RestaurantControl();
+        //rs = new RestaurantControl();
+        Intent intent = getIntent();
+        rs = (RestaurantControl) intent.getSerializableExtra("RestaurantControl");
         ArrayAdapter<String> adaTable = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item,rs.sCboTable);
         ArrayAdapter<String> adaArea = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item,rs.sCboArea);
         cboTable.setAdapter(adaTable);
         cboArea.setAdapter(adaArea);
+
+        //new retrieveArea().execute();
+    }
+    private void setTheme(){
+        lbMinced.setTextColor(Color.BLACK);
+        lbMinced.setTextColor(getResources().getColor(R.color.Black));
+        lbFall.setTextColor(getResources().getColor(R.color.Black));
+        lbKoy.setTextColor(getResources().getColor(R.color.Black));
+        lbBoilZaa.setTextColor(getResources().getColor(R.color.Black));
+        lbThickSoup.setTextColor(getResources().getColor(R.color.Black));
+        lbPapazaSalad.setTextColor(getResources().getColor(R.color.Black));
+        lbGrillPorkNeck.setTextColor(getResources().getColor(R.color.Black));
+        lbWeepingTiger.setTextColor(getResources().getColor(R.color.Black));
+        lbGrillRibBeef.setTextColor(getResources().getColor(R.color.Black));
+        lbStickyRice.setTextColor(getResources().getColor(R.color.Black));
+        lbBambooShootSalad.setTextColor(getResources().getColor(R.color.Black));
+        lbBurnBeef.setTextColor(getResources().getColor(R.color.Black));
+
+        //lbMessage.setText(Float.toString(lbMinced.getTextSize()));
+        lbMinced.setTextSize(textSize);
+        lbFall.setTextSize(textSize);
+        lbKoy.setTextSize(textSize);
+        lbBoilZaa.setTextSize(textSize);
+        lbThickSoup.setTextSize(textSize);
+        lbPapazaSalad.setTextSize(textSize);
+        lbGrillPorkNeck.setTextSize(textSize);
+        lbWeepingTiger.setTextSize(textSize);
+        lbGrillRibBeef.setTextSize(textSize);
+        lbStickyRice.setTextSize(textSize);
+        lbBambooShootSalad.setTextSize(textSize);
+        lbBurnBeef.setTextSize(textSize);
+
+        chkMincedPork.setTextSize(textSize1);
+        chkMincedBeef.setTextSize(textSize1);
+        chkMincedCatFish.setTextSize(textSize1);
+        chkFallPork.setTextSize(textSize1);
+        chkFallBeef.setTextSize(textSize1);
+        chkFallBitter.setTextSize(textSize1);
+        chkFallSour.setTextSize(textSize1);
+        chkFallBitter.setTextColor(getResources().getColor(R.color.Red));
+        chkFallSour.setTextColor(getResources().getColor(R.color.Red));
+        chkKoy.setTextSize(textSize1);
+        chkKoyKoo.setTextSize(textSize1);
+        chkKoyBitter.setTextSize(textSize1);
+        chkKoySour.setTextSize(textSize1);
+        chkKoyBitter.setTextColor(getResources().getColor(R.color.Red));
+        chkKoySour.setTextColor(getResources().getColor(R.color.Red));
+        chkBoilZaaBonePork.setTextSize(textSize1);
+        chkBoilZaaBeef.setTextSize(textSize1);
+        chkBoilZaaBitter.setTextSize(textSize1);
+        chkBoilZaaSour.setTextSize(textSize1);
+        chkBoilZaaBitter.setTextColor(getResources().getColor(R.color.Red));
+        chkBoilZaaSour.setTextColor(getResources().getColor(R.color.Red));
+        chkThickSoupPork.setTextSize(textSize1);
+        chkThickSoupPork.setTextSize(textSize1);
+        chkPapazaSaladThai.setTextSize(textSize1);
+        chkPapazaSaladCrab.setTextSize(textSize1);
+        chkPapazaSaladCrabPickledFish.setTextSize(textSize1);
+
     }
     private void saveOrder(){
-        String urlOrder="http://10.0.1.103:80/restaurant/testjson.php";
+        row=0;
+        String lotID = UUID.randomUUID().toString();
+        String areacode = cboArea.getSelectedItem().toString();
+        String tablecode = cboTable.getSelectedItem().toString();
+        for(int i=0;i<=12;i++){
+            row=i;
+            switch (i) {
+                case 0:
+                    if(txtQtyMinced.getValue()>0){
 
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
-        String uniqueID = UUID.randomUUID().toString();
-        params.add(new BasicNameValuePair("order_id", uniqueID));
-        params.add(new BasicNameValuePair("foods_code", "100"));
-        params.add(new BasicNameValuePair("foods_name", "555"));
-        params.add(new BasicNameValuePair("remark", "666"));
-        params.add(new BasicNameValuePair("qty", String.valueOf(txtQtyMinced.getValue())));
-        jobj = jsonparser.getJSONFromUrl("http://10.0.1.103:80/restaurant/saveTOrder.php", params);
+                        new retrieveData().execute(String.valueOf(i),lotID, "100", "10", tablecode, areacode);
+                    }
+                    break;
+                case 1:
+                    if(txtQtyFall.getValue()>0){
+                        new retrieveData().execute(String.valueOf(i),lotID, "101", "10", tablecode, areacode);
+                    }
+                    break;
+                case 2:
+                    if(txtQtyKoy.getValue()>0){
+                        new retrieveData().execute(String.valueOf(i),lotID, "102", "10", tablecode, areacode);
+                    }
+                    break;
+                case 3:
+                    if(txtQtyBoilZaa.getValue()>0){
+                        new retrieveData().execute(String.valueOf(i),lotID, "103", "10", tablecode, areacode);
+                    }
+                    break;
+                case 4:
+                    if(txtQtyThickSoup.getValue()>0){
+                        new retrieveData().execute(String.valueOf(i),lotID, "104", "10", tablecode, areacode);
+                    }
+                    break;
+                case 5:
+                    if(txtQtyPapazaSalad.getValue()>0){
+                        new retrieveData().execute(String.valueOf(i),lotID, "105", "10", tablecode, areacode);
+                    }
+                    break;
+                case 6:
+                    if(txtQtyGrillPorkNeck.getValue()>0){
+                        new retrieveData().execute(String.valueOf(i),lotID, "106", "10", tablecode, areacode);
+                    }
+                    break;
+                case 7:
+                    if(txtQtyWeepingTiger.getValue()>0){
+                        new retrieveData().execute(String.valueOf(i),lotID, "107", "10", tablecode, areacode);
+                    }
+                    break;
+                case 8:
+                    if(txtQtyGrillRibBeef.getValue()>0){
+                        new retrieveData().execute(String.valueOf(i),lotID, "108", "10", tablecode, areacode);
+                    }
+                    break;
+                case 9:
+                    if(txtQtyStickyRice.getValue()>0){
+                        new retrieveData().execute(String.valueOf(i),lotID, "109", "10", tablecode, areacode);
+                    }
+                    break;
+                case 10:
+                    if(txtQtyBambooShootSalad.getValue()>0){
+                        new retrieveData().execute(String.valueOf(i),lotID, "110", "10", tablecode, areacode);
+                    }
+                    break;
+                case 11:
+                    if(txtQtyBurnBeef.getValue()>0){
+                        new retrieveData().execute(String.valueOf(i),lotID, "111", "10", tablecode, areacode);
+                    }
+                    break;
+            }
+            //new retrievedata().execute(String.valueOf(i));
+        }
+        //jobj = jsonparser.getJSONFromUrl(urlOrder, params);
 
         // check your log for json response
-        Log.d("Login attempt", jobj.toString());
+        //Log.d("Login attempt", jobj.toString());
 
-        try {
-            ab = jobj.getString("key");
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        //try {
+        //    ab = jobj.getString("key");
+        //} catch (JSONException e) {
+        //    // TODO Auto-generated catch block
+        //    e.printStackTrace();
+        //}
     }
 
     @Override
     public void onHorizontalNumberPickerChanged(HorizontalNumberPicker horizontalNumberPicker, int value) {
         switch (horizontalNumberPicker.getId()) {
             case R.id.txtQtyMinced:
-                txtRemarkMinced.setText(String.valueOf(value));
+                //txtRemarkMinced.setText(String.valueOf(value));
                 break;
-
             case R.id.txtQtyFall:
                 //DebugLog.d("horizontal_number_picker2 current value: " + value);
                 break;
@@ -237,6 +389,197 @@ public class OrderAddActivity extends AppCompatActivity implements HorizontalNum
             case R.id.txtQtyKoy:
                 //DebugLog.d("horizontal_number_picker3 current value: " + value);
                 break;
+        }
+    }
+
+    class retrieveData extends AsyncTask<String,String,String>{
+        @Override
+        protected String doInBackground(String... arg0) {
+            // TODO Auto-generated method stub
+            //lbMessage = (TextView) findViewById(R.id.lbMessage);
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            String uniqueID = UUID.randomUUID().toString();
+            row = Integer.parseInt(arg0[0]);
+            params.add(new BasicNameValuePair("lot_id", arg0[1]));
+            params.add(new BasicNameValuePair("foods_code", arg0[2]));
+            params.add(new BasicNameValuePair("res_code", arg0[3]));
+            params.add(new BasicNameValuePair("table_code", arg0[4]));
+            params.add(new BasicNameValuePair("area_code", arg0[5]));
+            switch (row) {
+                case 0:
+                    params.add(new BasicNameValuePair("order_id", uniqueID));
+                    params.add(new BasicNameValuePair("foods_name", "555"));
+                    params.add(new BasicNameValuePair("remark", "666"));
+                    params.add(new BasicNameValuePair("price", "22"));
+                    params.add(new BasicNameValuePair("qty", qtyMinced));
+                    jarr = jsonparser.getJSONFromUrl("http://172.25.4.62:80/restaurant/saveTOrder.php",params);
+                    break;
+                case 1:
+                    params.add(new BasicNameValuePair("order_id", uniqueID));
+
+                    params.add(new BasicNameValuePair("foods_name", "555"));
+                    params.add(new BasicNameValuePair("remark", "666"));
+                    params.add(new BasicNameValuePair("price", "22"));
+                    params.add(new BasicNameValuePair("qty", qtyFall));
+                    jarr = jsonparser.getJSONFromUrl("http://172.25.4.62:80/restaurant/saveTOrder.php",params);
+                    break;
+                case 2:
+                    params.add(new BasicNameValuePair("order_id", uniqueID));
+
+                    params.add(new BasicNameValuePair("foods_name", "555"));
+                    params.add(new BasicNameValuePair("remark", "666"));
+                    params.add(new BasicNameValuePair("price", "22"));
+                    params.add(new BasicNameValuePair("qty", qtyKoy));
+                    jarr = jsonparser.getJSONFromUrl("http://172.25.4.62:80/restaurant/saveTOrder.php",params);
+                    break;
+                case 3:
+                    params.add(new BasicNameValuePair("order_id", uniqueID));
+
+                    params.add(new BasicNameValuePair("foods_name", "555"));
+                    params.add(new BasicNameValuePair("remark", "666"));
+                    params.add(new BasicNameValuePair("price", "22"));
+                    params.add(new BasicNameValuePair("qty", qtyBoilZaa));
+                    jarr = jsonparser.getJSONFromUrl("http://172.25.4.62:80/restaurant/saveTOrder.php",params);
+                    break;
+                case 4:
+                    params.add(new BasicNameValuePair("order_id", uniqueID));
+
+                    params.add(new BasicNameValuePair("foods_name", "555"));
+                    params.add(new BasicNameValuePair("remark", "666"));
+                    params.add(new BasicNameValuePair("price", "22"));
+                    params.add(new BasicNameValuePair("qty", qtyThickSoup));
+                    jarr = jsonparser.getJSONFromUrl("http://172.25.4.62:80/restaurant/saveTOrder.php",params);
+                    break;
+                case 5:
+                    params.add(new BasicNameValuePair("order_id", uniqueID));
+
+                    params.add(new BasicNameValuePair("foods_name", "555"));
+                    params.add(new BasicNameValuePair("remark", "666"));
+                    params.add(new BasicNameValuePair("price", "22"));
+                    params.add(new BasicNameValuePair("qty", qtyPapazaSalad));
+                    jarr = jsonparser.getJSONFromUrl("http://172.25.4.62:80/restaurant/saveTOrder.php",params);
+                    break;
+                case 6:
+                    params.add(new BasicNameValuePair("order_id", uniqueID));
+
+                    params.add(new BasicNameValuePair("foods_name", "555"));
+                    params.add(new BasicNameValuePair("remark", "666"));
+                    params.add(new BasicNameValuePair("price", "22"));
+                    params.add(new BasicNameValuePair("qty", qtyGrillPorkNeck));
+                    jarr = jsonparser.getJSONFromUrl("http://172.25.4.62:80/restaurant/saveTOrder.php",params);
+                    break;
+                case 7:
+                    params.add(new BasicNameValuePair("order_id", uniqueID));
+
+                    params.add(new BasicNameValuePair("foods_name", "555"));
+                    params.add(new BasicNameValuePair("remark", "666"));
+                    params.add(new BasicNameValuePair("price", "22"));
+                    params.add(new BasicNameValuePair("qty", qtyWeepingTiger));
+                    jarr = jsonparser.getJSONFromUrl("http://172.25.4.62:80/restaurant/saveTOrder.php",params);
+                    break;
+                case 8:
+                    params.add(new BasicNameValuePair("order_id", uniqueID));
+
+                    params.add(new BasicNameValuePair("foods_name", "555"));
+                    params.add(new BasicNameValuePair("remark", "666"));
+                    params.add(new BasicNameValuePair("price", "22"));
+                    params.add(new BasicNameValuePair("qty", qtyGrillRibBeef));
+                    jarr = jsonparser.getJSONFromUrl("http://172.25.4.62:80/restaurant/saveTOrder.php",params);
+                    break;
+                case 9:
+                    params.add(new BasicNameValuePair("order_id", uniqueID));
+
+                    params.add(new BasicNameValuePair("foods_name", "555"));
+                    params.add(new BasicNameValuePair("remark", "666"));
+                    params.add(new BasicNameValuePair("price", "22"));
+                    params.add(new BasicNameValuePair("qty", qtyStickRice));
+                    jarr = jsonparser.getJSONFromUrl("http://172.25.4.62:80/restaurant/saveTOrder.php",params);
+                    break;
+                case 10:
+                    params.add(new BasicNameValuePair("order_id", uniqueID));
+
+                    params.add(new BasicNameValuePair("foods_name", "555"));
+                    params.add(new BasicNameValuePair("remark", "666"));
+                    params.add(new BasicNameValuePair("price", "22"));
+                    params.add(new BasicNameValuePair("qty", qtyBambooShootSalad));
+                    jarr = jsonparser.getJSONFromUrl("http://172.25.4.62:80/restaurant/saveTOrder.php",params);
+                    break;
+                case 11:
+                    params.add(new BasicNameValuePair("order_id", uniqueID));
+
+                    params.add(new BasicNameValuePair("foods_name", "555"));
+                    params.add(new BasicNameValuePair("remark", "666"));
+                    params.add(new BasicNameValuePair("price", "22"));
+                    params.add(new BasicNameValuePair("qty", qtyBurnBeef));
+                    jarr = jsonparser.getJSONFromUrl("http://172.25.4.62:80/restaurant/saveTOrder.php",params);
+                    break;
+            }
+
+
+
+            // check your log for json response
+            Log.d("Login attempt", jobj.toString());
+
+            try {
+                JSONObject obj = (JSONObject) jarr.get(0);
+                ab = obj.getString("success");
+                if(ab.equals("1")){
+                    //lbMessage.setText("รับOrderเรียบร้อย");
+                    ab="รับOrderเรียบร้อย";
+                }
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return ab;
+        }
+        @Override
+        protected void onPostExecute(String ab){
+            lbMessage.setText(ab);
+        }
+        @Override
+        protected void onPreExecute() {
+            lbMessage.setText("กำลังส่งข้อมูล ...");
+            qtyMinced = String.valueOf(txtQtyMinced.getValue());
+            //pass = password.getText().toString();
+            switch (row) {
+                case 0:
+                    qtyMinced = String.valueOf(txtQtyMinced.getValue());
+                    break;
+                case 1:
+                    qtyFall = String.valueOf(txtQtyFall.getValue());
+                    break;
+                case 2:
+                    qtyKoy= String.valueOf(txtQtyKoy.getValue());
+                    break;
+                case 3:
+                    qtyBoilZaa = String.valueOf(txtQtyBoilZaa.getValue());
+                    break;
+                case 4:
+                    qtyThickSoup = String.valueOf(txtQtyThickSoup.getValue());
+                    break;
+                case 5:
+                    qtyPapazaSalad = String.valueOf(txtQtyPapazaSalad.getValue());
+                    break;
+                case 6:
+                    qtyGrillPorkNeck = String.valueOf(txtQtyGrillPorkNeck.getValue());
+                    break;
+                case 7:
+                    qtyWeepingTiger = String.valueOf(txtQtyWeepingTiger.getValue());
+                    break;
+                case 8:
+                    qtyGrillRibBeef = String.valueOf(txtQtyGrillRibBeef.getValue());
+                    break;
+                case 9:
+                    qtyStickRice = String.valueOf(txtQtyStickyRice.getValue());
+                    break;
+                case 10:
+                    qtyBambooShootSalad = String.valueOf(txtQtyBambooShootSalad.getValue());
+                    break;
+                case 11:
+                    qtyBurnBeef = String.valueOf(txtQtyBurnBeef.getValue());
+                    break;
+            }
         }
     }
 }

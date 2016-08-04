@@ -67,7 +67,8 @@
             <RadioGroup
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:id="@+id/chkGMinced">
                 <RadioButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -130,7 +131,8 @@
             <RadioGroup
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:id="@+id/chkGFall">
 
                 <RadioButton
                     android:layout_width="wrap_content"
@@ -415,7 +417,7 @@
             android:layout_height="match_parent"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="Small Text"
-            android:id="@+id/textView"
+            android:id="@+id/lbMessage"
             android:layout_row="16"
             android:layout_column="1" />
         <LinearLayout
