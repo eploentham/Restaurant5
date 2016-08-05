@@ -64,6 +64,17 @@ class Order
 		$tablecode="";
 		$deviceid="";
 		$areacode="";
+		$active="";
+		$statusfoods1="";
+		$statusfoods2="";
+		$statusfoods3="";
+		$statusbill="";
+		$billcheckdate="";
+		$statuscook="";
+		$cookreceivedate="";
+		$cookfinishdate="";
+		$statusvoid="";
+		$voiddate="";
 
 		$table="";
 		$pkfield="";
